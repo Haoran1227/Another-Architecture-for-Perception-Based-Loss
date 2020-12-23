@@ -99,8 +99,6 @@ for k_snr in range(0, len(SNR_situ_array)):
     h_filter_input  = Input(shape=(INPUT_SHAPE2))
     wfac_input = Input(shape=(INPUT_SHAPE2))  # weighting factors for frequency bins energy normalization in loss
 
-    sclae_input=Lambda(lambda x: x /100 )(auxiliary_input)
-
     d1 = Dense(n1)(input_img)
     d1 =BatchNormalization()(d1)
     d1 = LeakyReLU(0.2)(d1)
@@ -147,7 +145,7 @@ for k_snr in range(0, len(SNR_situ_array)):
     # Settings
     nb_epochs = 100
     batch_size = 128
-    learning_rate = 5e-4
+    learning_rate = 5e-5
     adam_wn = Adam(lr=learning_rate, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
     model.compile(optimizer=adam_wn, loss='mean_squared_error', metrics=['accuracy'])
     model.load_weights("./training results/mask_dnn_weight_filter_" + filter_type_str + "_" + noi_situ_model_str+ "_weights.h5")
