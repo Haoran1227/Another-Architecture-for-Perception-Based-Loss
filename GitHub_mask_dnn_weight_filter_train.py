@@ -134,6 +134,7 @@ training_target = h5py.File(mat_target,'r')
 x_train = training_target.get('training_target')
 x_train = np.array(x_train)
 x_train = np.transpose(x_train)
+x_train = np.exp(x_train/2)
 print('     Target data shape: %s' % str(x_train.shape))
 
 # Load Target Data for Validation
@@ -143,6 +144,7 @@ mat_target_vali = h5py.File(mat_target_vali,'r')
 x_train_vali = mat_target_vali.get('validation_target')
 x_train_vali = np.array(x_train_vali)
 x_train_vali = np.transpose(x_train_vali)
+x_train_vali = np.exp(x_train_vali/2)
 print('     Target validation data shape: %s' % str(x_train_vali.shape))
 
 # Load weighting filter frequency response frame-wise for training data
@@ -230,6 +232,7 @@ mask= Dense(129,activation='sigmoid')(d6)
 
 # Use the predicted mask to multiply the unnorm data
 decoded= Multiply()([mask,auxiliary_input])
+decoded = Lambda(lambda x: K.exp(x/2))(decoded)
 
 # Filter the enhanced data by weighting filter
 decoded_filt= Multiply()([decoded,h_filter_input])
@@ -243,7 +246,7 @@ model.summary()
 # Training settings
 nb_epochs = 100
 batch_size = 128
-learning_rate = 5e-4
+learning_rate = 5e-5
 adam_wn = Adam(lr=learning_rate, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
 model.compile(optimizer=adam_wn, loss='mean_squared_error', metrics=['accuracy'])
 

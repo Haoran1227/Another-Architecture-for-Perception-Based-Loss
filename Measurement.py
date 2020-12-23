@@ -161,7 +161,7 @@ for SNR in SNR_situ_array:
         dataframe = pd.DataFrame(
             {'': ['SDR', 'SIR', 'SAR', 'PESQ', ' '], 'mixture': mixture_score, 'baseline': baseline_score, 'log_power':log_power_score,
              'percep_loss': pw_score, 'PESQ_loss': pesq_score})
-        dataframe.to_csv('./measurements/' + 'Ego_noise_case_' + dB_exchange_dict[SNR] + '_measurement.csv', index=False, mode='a+', sep=',')
+        dataframe.to_csv('./measurements/' + 'Typing_noise_case_' + dB_exchange_dict[SNR] + '_measurement.csv', index=False, mode='a+', sep=',')
 
     # Store the average scores as csv files
     avg_mixture_score = list((avg_mixture_score/frame_num).reshape(-1))
@@ -194,5 +194,5 @@ for SNR in SNR_situ_array:
     avg_log_power_score.append(d_log_power)
 
     dataframe = pd.DataFrame({'':['SDR','SIR','SAR','PESQ','STOI'], 'mixture':avg_mixture_score,'baseline':avg_baseline_score,'log_power':avg_log_power_score,'percep_loss':avg_pw_score,'PESQ_loss':avg_pesq_score})
-    dataframe.to_csv('./measurements/' + 'Ego_noise_case_' + dB_exchange_dict[SNR] +'_average_measurement.csv', index=False, mode = 'a+', sep=',')
+    dataframe.to_csv('./measurements/' + 'Typing_noise_case_' + dB_exchange_dict[SNR] +'_average_measurement.csv', index=False, mode = 'a+', sep=',')
 

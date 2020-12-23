@@ -133,6 +133,7 @@ for k_snr in range(0, len(SNR_situ_array)):
 
     # Use the predicted mask to multiply the unnorm data
     decoded = Multiply()([mask, auxiliary_input])
+    decoded = Lambda(lambda x: K.exp(x/2))(decoded)
 
     # Filter the enhanced data by weighting filter
     decoded_filt = Multiply()([decoded, h_filter_input])

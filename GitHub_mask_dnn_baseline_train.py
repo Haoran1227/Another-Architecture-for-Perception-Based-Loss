@@ -160,6 +160,9 @@ f_vali_wfac = np.ones_like(x_train_noisy_vali_aux)
 f_vali_wfac[:, 1:fram_length-1] = int(2)
 print('     weighting factors for frequency bins: %s' % str(f_vali_wfac.shape))
 
+# Transform back to amplitude spectrum
+x_train = np.exp(x_train/2)
+x_train_vali = np.exp(x_train_vali/2)
 # Energy normalization for training/validation target
 x_train_wfac = np.multiply(x_train, f_train_wfac)
 x_train_vali_wfac = np.multiply(x_train_vali, f_vali_wfac)
@@ -207,6 +210,7 @@ mask= Dense(129,activation='sigmoid')(d6)
 
 # Use the predicted mask to multiply the unnorm data
 decoded= Multiply()([mask,auxiliary_input])
+decoded = Lambda(lambda x: K.exp(x/2))(decoded)
 
 # Weighting factors for frequency bins in loss (energy normalization)
 decoded_wgh_factor = Multiply()([decoded,wfac_input])
@@ -217,7 +221,7 @@ model.summary()
 # Training settings
 nb_epochs = 100
 batch_size = 128
-learning_rate = 5e-4
+learning_rate = 5e-5
 adam_wn = Adam(lr=learning_rate, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
 model.compile(optimizer=adam_wn, loss='mean_squared_error', metrics=['accuracy'])
 

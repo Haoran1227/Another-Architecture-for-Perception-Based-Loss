@@ -1,6 +1,6 @@
 #####################################################################################
-# GitHub_mask_dnn_log_power_MSE_train -
-# Training the log_power MSE loss mask-based DNN model for speech enhancement.
+# GitHub_mask_dnn_baseline_train -
+# Training the BASELINE mask-based DNN model for speech enhancement, i.e., MSE as loss
 # Given data:
 #       Training input
 #       Training unnorm input
@@ -9,7 +9,7 @@
 #       Validation unnorm input
 #       Validation target
 # Output data:
-#       Trained DNN model (with MSE loss in the log_power spectrum)
+#       Trained DNN model (with MSE loss)
 #
 # Technische Universität Braunschweig
 # Institute for Communications Technology (IfN)
@@ -19,11 +19,6 @@
 # 2019 - 05 - 23
 # (c) Ziyue Zhao
 #
-# Modified by Haoran Zhao
-# Lehrstuhl für Multimediakommunikation und Signalverarbeitung (LMS)
-# Germany
-# 2020 - 12 - 16
-
 # Use is permitted for any scientific purpose when citing the paper:
 # Z. Zhao, S. Elshamy, and T. Fingscheidt, "A Perceptual Weighting Filter
 # Loss for DNN Training in Speech Enhancement", arXiv preprint arXiv:
@@ -176,22 +171,6 @@ print('> Data Loaded. Compiling...')
 #####################################################################################
 # 2. define model
 #####################################################################################
-# Define the log-power MSE loss.
-def log_power_MSE_loss(y_true, y_pred):
-    # y_true and y_pred are amplitude spectrum.
-    # Calculate the log spectrum
-    log_spec_true = K.log(K.abs(y_true) + K.epsilon())
-    log_spec_pred = K.log(K.abs(y_pred) + K.epsilon())
-    # Mean and variance normalization (over the frequency axis)
-    mean_vector = K.mean(log_spec_true, axis=0)
-    std_vector = K.std(log_spec_true, axis=0)
-
-    # Normalization and calculation of the mse_loss
-    normed_log_spec_true = (log_spec_true - mean_vector) / std_vector
-    normed_log_spec_pred = (log_spec_pred - mean_vector) / std_vector
-    mse_loss = K.mean(K.square(normed_log_spec_pred - normed_log_spec_true), axis=-1)
-    return K.mean(mse_loss)
-
 input_img = Input(shape=(INPUT_SHAPE))
 auxiliary_input = Input(shape=(INPUT_SHAPE2)) # unnorm input data
 wfac_input = Input(shape=(INPUT_SHAPE2)) # weighting factors for frequency bins energy normalization in loss
@@ -240,7 +219,7 @@ nb_epochs = 100
 batch_size = 128
 learning_rate = 5e-5
 adam_wn = Adam(lr=learning_rate, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
-model.compile(optimizer=adam_wn, loss=log_power_MSE_loss, metrics=['accuracy'])
+model.compile(optimizer=adam_wn, loss='mean_squared_error', metrics=['accuracy'])
 
 #####################################################################################
 # 3. Fit the model

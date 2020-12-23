@@ -1,6 +1,6 @@
 #####################################################################################
-# GitHub_all_test_mask_dnn_log_power_MSE -
-# Test stage for log_power MSE loss mask-based DNN, generates the magnitude of FFT coeff. for
+# GitHub_all_test_mask_dnn_baseline -
+# Test stage for BASELINE mask-based DNN, generates the magnitude of FFT coeff. for
 # white- and black-box measurements.
 # Given data:
 #       Input Data: y_norm
@@ -94,22 +94,6 @@ for k_snr in range(0, len(SNR_situ_array)):
     #####################################################################################
     # 1. Model define
     #####################################################################################
-    # Define the log-power MSE loss.
-    def log_power_MSE_loss(y_true, y_pred):
-        # y_true and y_pred are amplitude spectrum.
-        # Calculate the log spectrum
-        log_spec_true = K.log(K.abs(y_true) + K.epsilon())
-        log_spec_pred = K.log(K.abs(y_pred) + K.epsilon())
-        # Mean and variance normalization (over the frequency axis)
-        mean_vector = K.mean(log_spec_true, axis=0)
-        std_vector = K.std(log_spec_true, axis=0)
-
-        # Normalization and calculation of the mse_loss
-        normed_log_spec_true = (log_spec_true - mean_vector) / std_vector
-        normed_log_spec_pred = (log_spec_pred - mean_vector) / std_vector
-        mse_loss = K.mean(K.square(normed_log_spec_pred - normed_log_spec_true), axis=-1)
-        return K.mean(mse_loss)
-
     input_img = Input(shape=(INPUT_SHAPE))
     auxiliary_input = Input(shape=(INPUT_SHAPE2))
     wfac_input = Input(shape=(INPUT_SHAPE2))  # weighting factors for frequency bins energy normalization in loss
@@ -145,6 +129,7 @@ for k_snr in range(0, len(SNR_situ_array)):
     mask= Dense(129,activation='sigmoid')(d6)
 
     decoded= Multiply()([mask,auxiliary_input])
+    decoded = Lambda(lambda x: K.exp(x/2))(decoded)
 
     # Weighting factors for frequency bins in loss (energy normalization)
     decoded_wgh_factor = Multiply()([decoded, wfac_input])
@@ -155,9 +140,9 @@ for k_snr in range(0, len(SNR_situ_array)):
     # Settings
     nb_epochs = 100
     batch_size = 128
-    learning_rate = 5e-5
+    learning_rate = 5e-4
     adam_wn = Adam(lr=learning_rate, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
-    model.compile(optimizer=adam_wn, loss=log_power_MSE_loss, metrics=['accuracy'])
+    model.compile(optimizer=adam_wn, loss='mean_squared_error', metrics=['accuracy'])
     model.load_weights("./training results/mask_dnn_log_power_MSE_" + noi_situ_model_str + "_weights.h5")
 
     #####################################################################################

@@ -157,8 +157,11 @@ for noi_lev_num = 1 : length(noi_lev_vec)
         end
     end
     test_input_abs_unnorm = test_input_abs_unnorm.';
+    test_input_abs_unnorm = log(abs(test_input_abs_unnorm).*abs(test_input_abs_unnorm));
     test_input_s = test_input_s.';
+    test_input_s = log(abs(test_input_s).*abs(test_input_s));
     test_input_n = test_input_n.';
+    test_input_n = log(abs(test_input_n).*abs(test_input_n));
 
     % --- Normalization to get: test_input_y
     load(['.\training data\mean_training_' noi_situ_model_str '.mat']); 

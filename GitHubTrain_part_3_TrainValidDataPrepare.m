@@ -80,6 +80,7 @@ for data_type_k = 1 : length(data_type_str_vec)
     data_type_str = data_type_str_vec{data_type_k};
     if strcmp(data_type_str,'input_data')
         load(train_mixture_dir) % from part 1
+        mixture_fft_abs = log(abs(mixture_fft_abs).*abs(mixture_fft_abs));
 
         % --- Arrange to cells per SNR
         target_length = speech_length/fram_shift; % number of frames per SNR level
@@ -162,6 +163,7 @@ for data_type_k = 1 : length(data_type_str_vec)
         % --- For target (clean data) and weighting filter coeff. 
         % --- Arrange to cells per SNR
         load(train_clean_dir); % from part 1
+        speech_fft_abs_clean = log(abs(speech_fft_abs_clean).*abs(speech_fft_abs_clean));
         load(train_wgh_filter_dir); % from part 2
         target_length = speech_length/fram_shift; %number of frames per SNR level
         SNR_mask = cell(1,1);
@@ -234,6 +236,6 @@ for data_type_k = 1 : length(data_type_str_vec)
         save(train_data_wgh_filter_dir,'h_filt_input','-v7.3');
         save(valid_data_wgh_filter_dir,'h_filt_vali_input','-v7.3');
 
-    end
+     end
 end
 

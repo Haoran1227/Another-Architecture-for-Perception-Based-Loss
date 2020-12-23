@@ -79,22 +79,19 @@ pmsqe.init_constants(Fs=8000,
                          apply_on_degraded=True,
                          apply_degraded_gain_correction=True)
 def PESQ_Loss(y_true, y_pred):
-    # y_true and y_pred are amplitude spectrum.
-    # Calculate the log spectrum
-    log_spec_true = K.log(K.abs(y_true)+K.epsilon())
-    log_spec_pred = K.log(K.abs(y_pred)+K.epsilon())
+    # y_true and y_pred are unnormed log-power spectrum.
     # Mean and variance normalization (over the frequency axis)
-    mean_vector = K.mean(log_spec_true,axis=0)
-    std_vector = K.std(log_spec_true,axis=0)
+    mean_vector = K.mean(y_true,axis=0)
+    std_vector = K.std(y_true,axis=0)
 
-    # Normalization and calculation of the mse_loss
-    normed_log_spec_true = (log_spec_true - mean_vector) / std_vector
-    normed_log_spec_pred = (log_spec_pred - mean_vector) / std_vector
+    # Normalization and calculation of the normalized mse_loss
+    normed_log_spec_true = (y_true - mean_vector) / std_vector
+    normed_log_spec_pred = (y_pred - mean_vector) / std_vector
     mse_loss = K.mean(K.square(normed_log_spec_pred-normed_log_spec_true),axis = -1)
 
-    # Calculate the power spectrum so that pmsqe_loss is obtained
-    spec_true = K.square(K.abs(y_true))
-    spec_pred = K.square(K.abs(y_pred))
+    # Calculate the amplitude spectrum so that pmsqe_loss is obtained
+    spec_true = K.exp(y_true)
+    spec_pred = K.exp(y_pred)
     pmsqe_loss = pmsqe.per_frame_PMSQE(spec_true, spec_pred, alpha=0.1)     #input is power spectrum
     return K.mean(mse_loss + pmsqe_loss)
 
@@ -158,6 +155,7 @@ for k_snr in range(0, len(SNR_situ_array)):
 
     # Use the predicted mask to multiply the unnorm data
     decoded = Multiply()([mask, auxiliary_input])
+    decoded = Lambda(lambda x: K.exp(x/2))(decoded)
 
     # Weighting factors for frequency bins in loss (energy normalization)
     decoded_wgh_factor = Multiply()([decoded, wfac_input])
